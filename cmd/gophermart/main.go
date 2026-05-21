@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/spider4216/gophermart/internal/handler"
+	"github.com/spider4216/gophermart/internal/middleware"
 	"github.com/spider4216/gophermart/internal/repository"
 	"github.com/spider4216/gophermart/internal/service"
 )
@@ -22,10 +23,14 @@ func main() {
 	repo := repository.New(app.store)
 	service := service.New(repo, app.logger)
 	handler := handler.New(app.cfg, app.logger, service)
+	middlewares := middleware.New(app.logger, app.cfg, service)
 
 	r := chi.NewRouter()
 
 	r.Route("/", func(r chi.Router) {
+		r.Use(middlewares.WithLogging)
+		r.Use(middlewares.WithGzip)
+
 		r.Get("/ping", http.HandlerFunc(handler.Ping))
 	})
 
