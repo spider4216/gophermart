@@ -27,10 +27,10 @@ migration-gen:
 	migrate create -ext sql -dir ./migrations -seq $(name)
 
 migrate-up:
-	migrate -path ./migrations -database $(dsn) up $(ver)
+	migrate -path ./migrations -database $(DATABASE_URI) up $(ver)
 
 migrate-down:
-	migrate -path ./migrations -database $(dsn) down $(ver)
+	migrate -path ./migrations -database $(DATABASE_URI) down $(ver)
 
 migrate-force:
-	migrate -path ./migrations -database $(dsn) force $(ver)
+	migrate -path ./migrations -database $(DATABASE_URI) force $(ver)

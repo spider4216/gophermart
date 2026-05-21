@@ -32,6 +32,7 @@ func main() {
 		r.Use(middlewares.WithGzip)
 
 		r.Get("/ping", http.HandlerFunc(handler.Ping))
+		r.Post("/api/user/register", http.HandlerFunc(handler.SignUp))
 	})
 
 	srv := &http.Server{

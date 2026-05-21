@@ -16,6 +16,8 @@ type Config struct {
 	WriteTimeout time.Duration `env:"WRITE_TIMEOUT" envDefault:"10s"`
 	IdleTimeout  time.Duration `env:"IDLE_TIMEOUT" envDefault:"30s"`
 	MaxBodySize  int64         `env:"MAX_BODY_SIZE" envDefault:"2048"`
+	ExpToken     time.Duration `env:"TOKEN_EXPIRE" envDefault:"1h"`
+	SecretKey    string        `env:"SECRET_KEY" envDefault:"qwerty"`
 }
 
 func New() (*Config, error) {
