@@ -77,7 +77,6 @@ func (app *app) initFlags() error {
 
 func (app *app) initConfig() error {
 	cfg, err := config.New()
-
 	if err != nil {
 		return err
 	}
@@ -104,9 +103,7 @@ func (app *app) initConfig() error {
 }
 
 func (app *app) initLogger() error {
-
 	level, err := zap.ParseAtomicLevel(app.cfg.LogLvl)
-
 	if err != nil {
 		return err
 	}
@@ -115,7 +112,6 @@ func (app *app) initLogger() error {
 	cfg.Level = level
 
 	logger, err := cfg.Build()
-
 	if err != nil {
 		return err
 	}
@@ -129,7 +125,6 @@ func (app *app) initLogger() error {
 
 func (app *app) initStore() error {
 	store, err := store.New(store.PostgreDriver, app.cfg.Dsn, app.logger)
-
 	if err != nil {
 		return err
 	}

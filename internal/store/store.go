@@ -16,7 +16,6 @@ type Storage interface {
 
 func New(driver string, dsn string, logger *zap.SugaredLogger) (Storage, error) {
 	pgxStore, err := NewPgxStore(dsn, logger)
-
 	if err != nil {
 		return nil, err
 	}

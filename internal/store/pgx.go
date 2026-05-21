@@ -16,7 +16,6 @@ type PgxStore struct {
 
 func NewPgxStore(dsn string, logger *zap.SugaredLogger) (*PgxStore, error) {
 	db, err := sql.Open(PostgreDriver, dsn)
-
 	if err != nil {
 		return nil, err
 	}
