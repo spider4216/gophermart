@@ -34,7 +34,6 @@ func (s Service) SignUpUser(ctx context.Context, username string, pass string) (
 	hashString := hex.EncodeToString(hash[:])
 
 	id, err := s.repo.CreateUser(ctx, username, hashString)
-
 	if err != nil {
 		return 0, err
 	}

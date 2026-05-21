@@ -23,7 +23,6 @@ func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) 
 
 	// создаём строку токена
 	tokenString, err := token.SignedString([]byte(secret))
-
 	if err != nil {
 		return "", err
 	}

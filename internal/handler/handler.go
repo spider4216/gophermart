@@ -52,7 +52,6 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, h.cfg.MaxBodySize)
 
 	body, err := io.ReadAll(r.Body)
-
 	if err != nil {
 		h.logger.Error("failed read body", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -69,7 +68,6 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Регистрация пользователя
 	id, err := h.service.SignUpUser(ctx, req.Login, req.Password)
-
 	if err != nil {
 		// Если ошибка является дубликатом
 		if err != nil && h.service.IsErrAsDuplicate(err) {
@@ -85,7 +83,6 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Авторизация
 	token, err := h.service.BuildJWTString(id, h.cfg.SecretKey, h.cfg.ExpToken)
-
 	if err != nil {
 		h.logger.Error("Unathorized", zap.Error(err))
 		w.WriteHeader(http.StatusUnauthorized)

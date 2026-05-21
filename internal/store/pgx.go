@@ -32,13 +32,11 @@ func (db *PgxStore) CreateUser(ctx context.Context, user models.User) (int64, er
 	sql := "INSERT INTO users (username,password) VALUES ($1,$2)"
 
 	res, err := db.DB.ExecContext(ctx, sql, &user.Username, &user.Password)
-
 	if err != nil {
 		return 0, err
 	}
 
 	id, err := res.LastInsertId()
-
 	if err != nil {
 		return 0, nil
 	}
