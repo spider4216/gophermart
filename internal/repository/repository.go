@@ -29,3 +29,7 @@ func (r *Repository) CreateUser(ctx context.Context, username string, hash strin
 
 	return r.store.CreateUser(ctx, user)
 }
+
+func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+	return r.store.GetUser(ctx, username)
+}

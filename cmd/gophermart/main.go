@@ -33,6 +33,7 @@ func main() {
 
 		r.Get("/ping", http.HandlerFunc(handler.Ping))
 		r.Post("/api/user/register", http.HandlerFunc(handler.SignUp))
+		r.Post("/api/user/login", http.HandlerFunc(handler.SignIn))
 	})
 
 	srv := &http.Server{

@@ -43,3 +43,17 @@ func (db *PgxStore) CreateUser(ctx context.Context, user models.User) (int64, er
 
 	return id, nil
 }
+
+func (db *PgxStore) GetUser(ctx context.Context, username string) (*models.User, error) {
+	sql := "SELECT username,password FROM users WHERE username=$1"
+
+	user := models.User{}
+
+	err := db.DB.QueryRow(sql, username).Scan(&user.Username, &user.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

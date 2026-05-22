@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/spider4216/gophermart/internal/models"
 	"github.com/spider4216/gophermart/internal/repository"
 	"go.uber.org/zap"
 )
@@ -39,6 +40,10 @@ func (s Service) SignUpUser(ctx context.Context, username string, pass string) (
 	}
 
 	return id, nil
+}
+
+func (s Service) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {
+	return s.repo.GetUserByUsername(ctx, login)
 }
 
 func (s Service) IsErrAsDuplicate(err error) bool {

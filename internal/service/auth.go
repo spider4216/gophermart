@@ -1,9 +1,12 @@
 package service
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/spider4216/gophermart/internal/models"
 )
 
 type claims struct {
@@ -29,4 +32,11 @@ func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) 
 
 	// возвращаем строку токена
 	return tokenString, nil
+}
+
+func (s Service) CheckPass(user *models.User, pass string) bool {
+	hash := sha256.Sum256([]byte(pass))
+	hashString := hex.EncodeToString(hash[:])
+
+	return hashString == user.Password
 }
