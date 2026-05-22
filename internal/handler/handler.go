@@ -62,7 +62,6 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 
 	// Преобразую номер заказа в число
 	num, err := strconv.Atoi(string(body))
-
 	if err != nil {
 		h.logger.Error("cannot convert order number to int", zap.Error(err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
