@@ -9,7 +9,7 @@ import (
 
 type claims struct {
 	jwt.RegisteredClaims
-	UserID int
+	UserID int64
 }
 
 func (m Middleware) WithJwt(h http.Handler) http.Handler {
@@ -43,8 +43,11 @@ func (m Middleware) WithJwt(h http.Handler) http.Handler {
 			return
 		}
 
+		m.logger.Debug("User id is ", claims.UserID, " set to ctx")
+
 		// Устанавливаем идентификатор пользователя в контекст
-		m.service.SetUserIdToCtx(r.Context(), int64(claims.UserID))
+		ctx := m.service.SetUserIdToCtx(r.Context(), int64(claims.UserID))
+		r = r.WithContext(ctx)
 
 		h.ServeHTTP(ow, r)
 	}

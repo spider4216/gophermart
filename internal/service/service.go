@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/spider4216/gophermart/internal/models"
 	"github.com/spider4216/gophermart/internal/repository"
+	"github.com/theplant/luhn"
 	"go.uber.org/zap"
 )
 
@@ -54,4 +55,8 @@ func (s Service) IsErrAsDuplicate(err error) bool {
 	}
 
 	return pgErr.Code == pgerrcode.UniqueViolation
+}
+
+func (s Service) IsOrderNumValid(num int) bool {
+	return luhn.Valid(num)
 }

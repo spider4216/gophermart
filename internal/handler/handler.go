@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/spider4216/gophermart/internal/config"
 	"github.com/spider4216/gophermart/internal/models"
@@ -43,6 +44,38 @@ func (h Handler) Ping(w http.ResponseWriter, r *http.Request) {
 
 // Загрузка номера заказа
 func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), h.cfg.CtxTimeout)
+
+	defer cancel()
+
+	h.logger.Debug("User ID ", h.service.GetUserIdFromCtx(ctx))
+
+	// Получаем тело запроса
+	r.Body = http.MaxBytesReader(w, r.Body, h.cfg.MaxBodySize)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		h.logger.Error("failed read body", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Преобразую номер заказа в число
+	num, err := strconv.Atoi(string(body))
+
+	if err != nil {
+		h.logger.Error("cannot convert order number to int", zap.Error(err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
+
+	// Валидирую номер заказа
+	if !h.service.IsOrderNumValid(num) {
+		h.logger.Error("Invalid order number", zap.Error(err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 

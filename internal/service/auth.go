@@ -20,7 +20,7 @@ const (
 
 type claims struct {
 	jwt.RegisteredClaims
-	UserID int
+	UserID int64
 }
 
 func (s Service) SetUserIdToCtx(ctx context.Context, userId int64) context.Context {
@@ -44,7 +44,7 @@ func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) 
 			// когда создан токен
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp)),
 		},
-		UserID: int(userId),
+		UserID: userId,
 	})
 
 	// создаём строку токена
@@ -52,6 +52,8 @@ func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) 
 	if err != nil {
 		return "", err
 	}
+
+	s.logger.Debug("User ID is ", userId, " set to token")
 
 	// возвращаем строку токена
 	return tokenString, nil
