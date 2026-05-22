@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"time"
@@ -9,9 +10,31 @@ import (
 	"github.com/spider4216/gophermart/internal/models"
 )
 
+type (
+	userIdKey string
+)
+
+const (
+	userKey userIdKey = "user_id"
+)
+
 type claims struct {
 	jwt.RegisteredClaims
 	UserID int
+}
+
+func (s Service) SetUserIdToCtx(ctx context.Context, userId int64) context.Context {
+	return context.WithValue(ctx, userKey, userId)
+}
+
+func (s Service) GetUserIdFromCtx(ctx context.Context) int64 {
+	userId, ok := ctx.Value(userKey).(int64)
+
+	if !ok {
+		return 0
+	}
+
+	return userId
 }
 
 func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) (string, error) {

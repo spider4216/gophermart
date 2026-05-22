@@ -34,6 +34,7 @@ func main() {
 		r.Get("/ping", http.HandlerFunc(handler.Ping))
 		r.Post("/api/user/register", http.HandlerFunc(handler.SignUp))
 		r.Post("/api/user/login", http.HandlerFunc(handler.SignIn))
+		r.With(middlewares.WithJwt).Post("/api/user/orders", http.HandlerFunc(handler.RegOrder))
 	})
 
 	srv := &http.Server{

@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -40,6 +39,11 @@ func (h Handler) Ping(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	h.logger.Info("Ping store OK")
+}
+
+// Загрузка номера заказа
+func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 // Авторизация пользователя
@@ -89,7 +93,7 @@ func (h Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	w.Header().Add("Authorization", token)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -140,6 +144,6 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	w.Header().Add("Authorization", token)
 	w.WriteHeader(http.StatusOK)
 }
