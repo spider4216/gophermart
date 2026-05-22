@@ -50,7 +50,6 @@ func (db *PgxStore) GetUser(ctx context.Context, username string) (*models.User,
 	user := models.User{}
 
 	err := db.DB.QueryRow(sql, username).Scan(&user.Username, &user.Password)
-
 	if err != nil {
 		return nil, err
 	}

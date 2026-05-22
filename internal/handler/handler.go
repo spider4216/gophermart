@@ -68,7 +68,6 @@ func (h Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	// Извлечение пользователя по логину
 	user, err := h.service.GetUserByLogin(ctx, req.Login)
-
 	if err != nil {
 		h.logger.Error("User not found", zap.Error(err))
 		w.WriteHeader(http.StatusUnauthorized)
