@@ -31,7 +31,6 @@ func (m Middleware) WithJwt(h http.Handler) http.Handler {
 			func(t *jwt.Token) (interface{}, error) {
 				return []byte(m.cfg.SecretKey), nil
 			})
-
 		if err != nil {
 			m.logger.Error("Something went wrong with token", zap.Error(err))
 			w.WriteHeader(http.StatusUnauthorized)
