@@ -30,6 +30,10 @@ func (s Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
+func (s Service) GetOrdersByUserId(ctx context.Context, userId int64) ([]models.Order, error) {
+	return s.repo.GetOrdersByUserId(ctx, userId)
+}
+
 func (s Service) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
 	return s.repo.GetOrderByUserId(ctx, num, userId)
 }

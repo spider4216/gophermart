@@ -21,6 +21,10 @@ func (r *Repository) Ping(ctx context.Context) error {
 	return r.store.Ping(ctx)
 }
 
+func (r *Repository) GetOrdersByUserId(ctx context.Context, userId int64) ([]models.Order, error) {
+	return r.store.GetUserOrders(ctx, userId)
+}
+
 func (r *Repository) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
 	return r.store.GetUserOrder(ctx, num, userId)
 }

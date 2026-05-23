@@ -28,6 +28,47 @@ func (db *PgxStore) Ping(ctx context.Context) error {
 	return db.DB.PingContext(ctx)
 }
 
+func (db *PgxStore) GetUserOrders(ctx context.Context, userId int64) ([]models.Order, error) {
+	sql := "SELECT id,user_id,num,status,accrual,created_at,updated_at FROM orders WHERE user_id=$1"
+
+	rows, err := db.DB.QueryContext(ctx, sql, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			db.logger.Warn("Cannot close rows", zap.Error(err))
+		}
+	}()
+
+	var items []models.Order
+
+	for rows.Next() {
+		var item models.Order
+
+		if err := rows.Scan(
+			&item.ID,
+			&item.UserId,
+			&item.Num,
+			&item.Status,
+			&item.Accrual,
+			&item.CreatedAt,
+			&item.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
 func (db *PgxStore) GetUserOrder(ctx context.Context, num int, userId int64) (*models.Order, error) {
 	sql := "SELECT id,user_id,num,status,accrual,created_at,updated_at FROM orders WHERE num=$1 AND user_id=$2"
 

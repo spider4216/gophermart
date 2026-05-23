@@ -44,6 +44,43 @@ func (h Handler) Ping(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info("Ping store OK")
 }
 
+func (h Handler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), h.cfg.CtxTimeout)
+
+	defer cancel()
+
+	userId := h.service.GetUserIdFromCtx(ctx)
+
+	h.logger.Debug("User ID ", userId)
+
+	orders, err := h.service.GetOrdersByUserId(ctx, userId)
+
+	if err != nil {
+		h.logger.Error("cannot get user orders", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if len(orders) <= 0 {
+		h.logger.Error("No orders found")
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	resp := h.mapOrdersResp(orders)
+
+	b, err := json.Marshal(resp)
+
+	if err != nil {
+		h.logger.Error("cannot marshal response", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
 // Загрузка номера заказа
 func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.cfg.CtxTimeout)
@@ -114,7 +151,7 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 
 	h.logger.Debug("Order was created: ", orderId)
 
-	// Отправляю задачу на обраотку задачи в очередь
+	// todo Отправляю задачу на обраотку задачи в очередь
 
 	w.WriteHeader(http.StatusAccepted)
 }
