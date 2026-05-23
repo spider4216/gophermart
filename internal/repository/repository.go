@@ -21,6 +21,20 @@ func (r *Repository) Ping(ctx context.Context) error {
 	return r.store.Ping(ctx)
 }
 
+func (r *Repository) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
+	return r.store.GetUserOrder(ctx, num, userId)
+}
+
+func (r *Repository) CreateOrder(ctx context.Context, userId int64, num int) (int64, error) {
+	order := models.Order{
+		UserId: userId,
+		Num:    num,
+		Status: models.New,
+	}
+
+	return r.store.CreateOrder(ctx, order)
+}
+
 func (r *Repository) CreateUser(ctx context.Context, username string, hash string) (int64, error) {
 	user := models.User{
 		Username: username,

@@ -2,7 +2,9 @@ package handler
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -75,7 +77,46 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	userId := h.service.GetUserIdFromCtx(ctx)
+
+	order, err := h.service.GetOrderByUserId(ctx, num, userId)
+	if err != nil {
+		// Если ошибка не связана с отсутствием записей в таблице
+		if !errors.Is(err, sql.ErrNoRows) {
+			h.logger.Error("cannot get order", zap.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if order != nil {
+		// Если номер заказа уже был ранее зарегистрирован у пользователя
+		// то прекращаем работу
+		h.logger.Error("user has already have order number: ", num)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Создаю заказ
+	orderId, err := h.service.CreateOrder(ctx, userId, num)
+	if err != nil {
+		// Если ошибка является дубликатом
+		if err != nil && h.service.IsErrAsDuplicate(err) {
+			h.logger.Error("Order has already exist", zap.Error(err))
+			w.WriteHeader(http.StatusConflict)
+			return
+		}
+
+		h.logger.Error("cannot create order", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	h.logger.Debug("Order was created: ", orderId)
+
+	// Отправляю задачу на обраотку задачи в очередь
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 // Авторизация пользователя

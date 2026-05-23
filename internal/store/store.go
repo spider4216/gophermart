@@ -15,6 +15,8 @@ type Storage interface {
 	Ping(ctx context.Context) error
 	CreateUser(ctx context.Context, user models.User) (int64, error)
 	GetUser(ctx context.Context, username string) (*models.User, error)
+	CreateOrder(ctx context.Context, order models.Order) (int64, error)
+	GetUserOrder(ctx context.Context, num int, userId int64) (*models.Order, error)
 }
 
 func New(driver string, dsn string, logger *zap.SugaredLogger) (Storage, error) {

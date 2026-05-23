@@ -28,10 +28,47 @@ func (db *PgxStore) Ping(ctx context.Context) error {
 	return db.DB.PingContext(ctx)
 }
 
+func (db *PgxStore) GetUserOrder(ctx context.Context, num int, userId int64) (*models.Order, error) {
+	sql := "SELECT id,user_id,num,status,accrual,created_at,updated_at FROM orders WHERE num=$1 AND user_id=$2"
+
+	order := models.Order{}
+
+	err := db.DB.QueryRow(sql, num, userId).Scan(
+		&order.ID,
+		&order.UserId,
+		&order.Num,
+		&order.Status,
+		&order.Accrual,
+		&order.CreatedAt,
+		&order.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &order, nil
+}
+
+func (db *PgxStore) CreateOrder(ctx context.Context, order models.Order) (int64, error) {
+	sql := "INSERT INTO orders (user_id,num,status) VALUES ($1,$2,$3)"
+
+	res, err := db.DB.ExecContext(ctx, sql, order.UserId, order.Num, order.Status)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, nil
+	}
+
+	return id, nil
+}
+
 func (db *PgxStore) CreateUser(ctx context.Context, user models.User) (int64, error) {
 	sql := "INSERT INTO users (username,password) VALUES ($1,$2)"
 
-	res, err := db.DB.ExecContext(ctx, sql, &user.Username, &user.Password)
+	res, err := db.DB.ExecContext(ctx, sql, user.Username, user.Password)
 	if err != nil {
 		return 0, err
 	}

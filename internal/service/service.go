@@ -30,6 +30,14 @@ func (s Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
+func (s Service) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
+	return s.repo.GetOrderByUserId(ctx, num, userId)
+}
+
+func (s Service) CreateOrder(ctx context.Context, userId int64, num int) (int64, error) {
+	return s.repo.CreateOrder(ctx, userId, num)
+}
+
 func (s Service) SignUpUser(ctx context.Context, username string, pass string) (int64, error) {
 	hash := sha256.Sum256([]byte(pass))
 
