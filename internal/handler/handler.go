@@ -54,7 +54,6 @@ func (h Handler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 	h.logger.Debug("User ID ", userId)
 
 	orders, err := h.service.GetOrdersByUserId(ctx, userId)
-
 	if err != nil {
 		h.logger.Error("cannot get user orders", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +69,6 @@ func (h Handler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 	resp := h.mapOrdersResp(orders)
 
 	b, err := json.Marshal(resp)
-
 	if err != nil {
 		h.logger.Error("cannot marshal response", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -78,7 +76,10 @@ func (h Handler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(b)
+	if _, err := w.Write(b); err != nil {
+		h.logger.Error("Cannot write response", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // Загрузка номера заказа
