@@ -11,6 +11,13 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+const (
+	StatusRegistered string = "REGISTERED"
+	StatusProcessing string = "PROCESSING"
+	StatusInvalid    string = "INVALID"
+	StatusProcessed  string = "PROCESSED"
+)
+
 // Обертка ответа от внешнего сервиса
 type RemoteResp struct {
 	StatusCode int
@@ -87,13 +94,13 @@ func (s Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 
 			// Заказ обработан успешно, начинаем отслеживать статусы
 			// Если статус REGISTERED, пропускаем итерацию
-			if resp.Data.Status == "REGISTERED" {
+			if resp.Data.Status == StatusRegistered {
 				s.logger.Debug("Status REGISTERED, try again...")
 				continue
 			}
 
 			// Если статус PROCESSING, то обновляем статус в БД и продолжаем опрос
-			if resp.Data.Status == "PROCESSING" {
+			if resp.Data.Status == StatusProcessing {
 				// todo update db status
 				s.logger.Debug("Status PROCESSING, try again...")
 				continue
@@ -101,7 +108,7 @@ func (s Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 
 			// Если статус финальный но ошибочный - INVALID, то обновляем статус в БД
 			// и прекращаем работу
-			if resp.Data.Status == "INVALID" {
+			if resp.Data.Status == StatusInvalid {
 				// todo update db status
 				// Ошибки нет, если вернулась структура но сумма нулевая, значит INVALID
 				s.logger.Debug("Status INVALID, exit...")
@@ -110,7 +117,7 @@ func (s Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 
 			// Если сьатус финальный и не ошибочный - PROCESSED, то обновляем в БД
 			// и прекращаем работу
-			if resp.Data.Status == "PROCESSED" {
+			if resp.Data.Status == StatusProcessed {
 				// todo update db status
 				s.logger.Debug("Status PROCESSED, done, exit...")
 				return resp.Data.Accrual, nil
