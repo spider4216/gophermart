@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"sync"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/jackc/pgerrcode"
@@ -18,18 +19,22 @@ import (
 
 func New(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Config, httpC *resty.Client) Service {
 	return Service{
-		repo:   repo,
-		logger: logger,
-		cfg:    cfg,
-		httpC:  httpC,
+		repo:      repo,
+		logger:    logger,
+		cfg:       cfg,
+		httpC:     httpC,
+		pauseChan: make(chan struct{}), // Изначально открытый канал
 	}
 }
 
 type Service struct {
-	repo   *repository.Repository
-	logger *zap.SugaredLogger
-	cfg    *config.Config
-	httpC  *resty.Client
+	repo      *repository.Repository
+	logger    *zap.SugaredLogger
+	cfg       *config.Config
+	httpC     *resty.Client
+	pauseMu   sync.RWMutex
+	pauseChan chan struct{} // Канал, который закроем, когда пауза завершается
+	isPaused  bool          // Флаг, пригодится в горутинах, чтобы понимать нужно ли ожидать
 }
 
 func (s *Service) Ping(ctx context.Context) error {

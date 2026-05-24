@@ -57,6 +57,13 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 	defer ticker.Stop()
 
 	for {
+		// Перед каждым тиком проверяем нет ли глобальной паузы
+		// Которая запускается при Retry Timeout
+		// Если пауза установлена, то ожидаем разблокировки
+		if err := s.checkPause(ctx); err != nil {
+			return 0, err
+		}
+
 		select {
 		case <-ticker.C:
 			// Таймер сработал, отправляем запрос
@@ -70,11 +77,11 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			// Если уперлись в лимит времени, то ожидаем
 			if resp.Retry != 0 {
 				s.logger.Debug("Too many requests to remote, wait ", resp.Retry, "s")
-				time.Sleep(resp.Retry * time.Second)
-				// Затем перезапускаем итерацию
-				// todo но тут еще должно бть что-то заставляет ожидать через канал все гоурутины
-				// поскольку внешний сервис по условию задачи глобально встал для
-				// всех заказов
+				// Тут устаналиваем глобальную паузу, все горутины начнут
+				// ожидать пока пауза не истечет. В методе startGlobalPause в отдельноу
+				// горутине запустится таймер по истечении которого канал будет оповещен
+				// и цикл перестанет блокироваться в самом начале
+				s.startGlobalPause(resp.Retry)
 				continue
 			}
 
@@ -166,8 +173,69 @@ func (s *Service) sendReq(num int) (*RemoteResp, error) {
 			return nil, err
 		}
 
-		res.Retry = time.Duration(retry)
+		res.Retry = time.Duration(retry) * time.Second
 	}
 
 	return &res, nil
+}
+
+// Проверяет активна ли пауза и если да, горутина будет ждать ее окончания
+func (s *Service) checkPause(ctx context.Context) error {
+	s.pauseMu.RLock()
+
+	// Если глобальная пауза ранее никем не была включена
+	// То выходим без ожидания
+	if !s.isPaused {
+		s.pauseMu.RUnlock()
+		return nil
+	}
+
+	// Если пауза активна, то ожидаем
+	// пока пауза не прекратится через канал или
+	// пока контекст не отменится
+	ch := s.pauseChan
+	s.pauseMu.RUnlock()
+
+	select {
+	case <-ch:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (s *Service) startGlobalPause(duration time.Duration) {
+	s.pauseMu.Lock()
+
+	// Если кто-то включил глобальную паузу ранее, то
+	// нет необходимости ее снова включать
+	if s.isPaused {
+		s.pauseMu.Unlock()
+		return
+	}
+
+	s.logger.Debug("Start global pause on ", duration)
+
+	s.isPaused = true
+	// Создаем глобальный канал который будут все ждать
+	s.pauseChan = make(chan struct{})
+	s.pauseMu.Unlock()
+
+	// Чтобы не блокировать текущий метод, ожидание запускаем
+	// в Go рутине, она сама запишет в канал когда
+	// таймаут пройдет. Примерно так мы уже делали в одном из инкрементов
+
+	go func() {
+		time.Sleep(duration)
+
+		s.pauseMu.Lock()
+		// Снимаем глобальную паузу
+		s.isPaused = false
+		// Закрываем глобальный канал, тут поидее все горутины
+		// которые его слушали должны разблокироваться
+		close(s.pauseChan)
+		s.pauseMu.Unlock()
+
+		s.logger.Debug("Global pause ended")
+	}()
 }
