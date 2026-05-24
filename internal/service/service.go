@@ -8,22 +8,25 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/spider4216/gophermart/internal/config"
 	"github.com/spider4216/gophermart/internal/models"
 	"github.com/spider4216/gophermart/internal/repository"
 	"github.com/theplant/luhn"
 	"go.uber.org/zap"
 )
 
-func New(repo *repository.Repository, logger *zap.SugaredLogger) Service {
+func New(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Config) Service {
 	return Service{
 		repo:   repo,
 		logger: logger,
+		cfg:    cfg,
 	}
 }
 
 type Service struct {
 	repo   *repository.Repository
 	logger *zap.SugaredLogger
+	cfg    *config.Config
 }
 
 func (s Service) Ping(ctx context.Context) error {

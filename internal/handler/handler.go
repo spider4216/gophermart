@@ -152,7 +152,11 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 
 	h.logger.Debug("Order was created: ", orderId)
 
+	withoutCancel := context.WithoutCancel(r.Context())
+
 	// todo Отправляю задачу на обраотку задачи в очередь
+	// Незабыть ограничить кол-во Go-рутин через паттерн типа woorking pool
+	go h.service.CalcBonus(withoutCancel, num)
 
 	w.WriteHeader(http.StatusAccepted)
 }

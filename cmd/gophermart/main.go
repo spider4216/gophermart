@@ -21,7 +21,7 @@ func main() {
 	app.logger.Debug("Config: ", app.cfg)
 
 	repo := repository.New(app.store)
-	service := service.New(repo, app.logger)
+	service := service.New(repo, app.logger, app.cfg)
 	handler := handler.New(app.cfg, app.logger, service)
 	middlewares := middleware.New(app.logger, app.cfg, service)
 
