@@ -9,10 +9,10 @@ import (
 type Middleware struct {
 	logger  *zap.SugaredLogger
 	cfg     *config.Config
-	service service.Service
+	service *service.Service
 }
 
-func New(logger *zap.SugaredLogger, cfg *config.Config, service service.Service) Middleware {
+func New(logger *zap.SugaredLogger, cfg *config.Config, service *service.Service) Middleware {
 	return Middleware{
 		logger:  logger,
 		cfg:     cfg,

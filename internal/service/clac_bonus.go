@@ -87,13 +87,13 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			// Если 204, то заказ не зарегистрирован
 			if resp.StatusCode == http.StatusNoContent {
 				s.logger.Error("Order was not registered")
-				return 0, fmt.Errorf("Order was not registered")
+				return 0, fmt.Errorf("order was not registered")
 			}
 
 			// Если статус не 200, то какая-то ошибка
 			if resp.StatusCode != http.StatusOK {
 				s.logger.Error("Something went wrong on remote side")
-				return 0, fmt.Errorf("Something went wrong on remote side")
+				return 0, fmt.Errorf("something went wrong on remote side")
 			}
 
 			// Заказ обработан успешно, начинаем отслеживать статусы
@@ -129,7 +129,7 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 
 		case <-ctx.Done():
 			s.logger.Debug("Context in remote polling was canceled")
-			return 0, fmt.Errorf("Context wac canceled")
+			return 0, fmt.Errorf("context wac canceled")
 		}
 	}
 }
@@ -152,6 +152,9 @@ func (s *Service) sendReq(num int) (*RemoteResp, error) {
 	resp, err := client.R().
 		SetResult(&remote).
 		Get(fullUrl)
+	if err != nil {
+		return nil, err
+	}
 
 	s.logger.Debug("Remote response ", string(resp.Body()))
 

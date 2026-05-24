@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func New(cfg *config.Config, logger *zap.SugaredLogger, service service.Service) Handler {
+func New(cfg *config.Config, logger *zap.SugaredLogger, service *service.Service) Handler {
 	return Handler{
 		cfg:     cfg,
 		service: service,
@@ -25,7 +25,7 @@ func New(cfg *config.Config, logger *zap.SugaredLogger, service service.Service)
 
 type Handler struct {
 	cfg     *config.Config
-	service service.Service
+	service *service.Service
 	logger  *zap.SugaredLogger
 }
 
@@ -154,9 +154,12 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 
 	withoutCancel := context.WithoutCancel(r.Context())
 
-	// todo Отправляю задачу на обраотку задачи в очередь
-	// Незабыть ограничить кол-во Go-рутин через паттерн типа woorking pool
-	go h.service.CalcBonus(withoutCancel, num)
+	// todo Незабыть ограничить кол-во Go-рутин через паттерн типа woorking pool
+	go func() {
+		if _, err := h.service.CalcBonus(withoutCancel, num); err != nil {
+			h.logger.Error("Cannot calc", zap.Error(err))
+		}
+	}()
 
 	w.WriteHeader(http.StatusAccepted)
 }

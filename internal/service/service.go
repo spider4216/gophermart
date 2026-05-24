@@ -17,8 +17,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func New(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Config, httpC *resty.Client) Service {
-	return Service{
+func New(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Config, httpC *resty.Client) *Service {
+	return &Service{
 		repo:      repo,
 		logger:    logger,
 		cfg:       cfg,
