@@ -23,11 +23,11 @@ type claims struct {
 	UserID int64
 }
 
-func (s Service) SetUserIdToCtx(ctx context.Context, userId int64) context.Context {
+func (s *Service) SetUserIdToCtx(ctx context.Context, userId int64) context.Context {
 	return context.WithValue(ctx, userKey, userId)
 }
 
-func (s Service) GetUserIdFromCtx(ctx context.Context) int64 {
+func (s *Service) GetUserIdFromCtx(ctx context.Context) int64 {
 	userId, ok := ctx.Value(userKey).(int64)
 
 	if !ok {
@@ -37,7 +37,7 @@ func (s Service) GetUserIdFromCtx(ctx context.Context) int64 {
 	return userId
 }
 
-func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) (string, error) {
+func (s *Service) BuildJWTString(userId int64, secret string, exp time.Duration) (string, error) {
 	// создаём новый токен с алгоритмом подписи HS256 и утверждениями
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -59,7 +59,7 @@ func (s Service) BuildJWTString(userId int64, secret string, exp time.Duration) 
 	return tokenString, nil
 }
 
-func (s Service) CheckPass(user *models.User, pass string) bool {
+func (s *Service) CheckPass(user *models.User, pass string) bool {
 	hash := sha256.Sum256([]byte(pass))
 	hashString := hex.EncodeToString(hash[:])
 

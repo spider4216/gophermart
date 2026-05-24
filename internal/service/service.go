@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/spider4216/gophermart/internal/config"
@@ -15,11 +16,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func New(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Config) Service {
+func New(repo *repository.Repository, logger *zap.SugaredLogger, cfg *config.Config, httpC *resty.Client) Service {
 	return Service{
 		repo:   repo,
 		logger: logger,
 		cfg:    cfg,
+		httpC:  httpC,
 	}
 }
 
@@ -27,25 +29,26 @@ type Service struct {
 	repo   *repository.Repository
 	logger *zap.SugaredLogger
 	cfg    *config.Config
+	httpC  *resty.Client
 }
 
-func (s Service) Ping(ctx context.Context) error {
+func (s *Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
-func (s Service) GetOrdersByUserId(ctx context.Context, userId int64) ([]models.Order, error) {
+func (s *Service) GetOrdersByUserId(ctx context.Context, userId int64) ([]models.Order, error) {
 	return s.repo.GetOrdersByUserId(ctx, userId)
 }
 
-func (s Service) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
+func (s *Service) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
 	return s.repo.GetOrderByUserId(ctx, num, userId)
 }
 
-func (s Service) CreateOrder(ctx context.Context, userId int64, num int) (int64, error) {
+func (s *Service) CreateOrder(ctx context.Context, userId int64, num int) (int64, error) {
 	return s.repo.CreateOrder(ctx, userId, num)
 }
 
-func (s Service) SignUpUser(ctx context.Context, username string, pass string) (int64, error) {
+func (s *Service) SignUpUser(ctx context.Context, username string, pass string) (int64, error) {
 	hash := sha256.Sum256([]byte(pass))
 
 	hashString := hex.EncodeToString(hash[:])
@@ -58,11 +61,11 @@ func (s Service) SignUpUser(ctx context.Context, username string, pass string) (
 	return id, nil
 }
 
-func (s Service) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {
+func (s *Service) GetUserByLogin(ctx context.Context, login string) (*models.User, error) {
 	return s.repo.GetUserByUsername(ctx, login)
 }
 
-func (s Service) IsErrAsDuplicate(err error) bool {
+func (s *Service) IsErrAsDuplicate(err error) bool {
 	var pgErr *pgconn.PgError
 
 	if !errors.As(err, &pgErr) {
@@ -72,6 +75,6 @@ func (s Service) IsErrAsDuplicate(err error) bool {
 	return pgErr.Code == pgerrcode.UniqueViolation
 }
 
-func (s Service) IsOrderNumValid(num int) bool {
+func (s *Service) IsOrderNumValid(num int) bool {
 	return luhn.Valid(num)
 }

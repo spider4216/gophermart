@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-resty/resty/v2"
 	"github.com/spider4216/gophermart/internal/handler"
 	"github.com/spider4216/gophermart/internal/middleware"
 	"github.com/spider4216/gophermart/internal/repository"
@@ -20,8 +21,10 @@ func main() {
 
 	app.logger.Debug("Config: ", app.cfg)
 
+	httpC := resty.New()
+
 	repo := repository.New(app.store)
-	service := service.New(repo, app.logger, app.cfg)
+	service := service.New(repo, app.logger, app.cfg, httpC)
 	handler := handler.New(app.cfg, app.logger, service)
 	middlewares := middleware.New(app.logger, app.cfg, service)
 

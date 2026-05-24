@@ -7,8 +7,6 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-
-	"github.com/go-resty/resty/v2"
 )
 
 const (
@@ -32,7 +30,7 @@ type RemoteData struct {
 	Accrual float32 `json:"accrual"`
 }
 
-func (s Service) CalcBonus(ctx context.Context, num int) (float32, error) {
+func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 	// 1. Отправка запроса в систему лояльности
 	// GET /api/orders/{number}
 	// 2. Ожидание финального статуса
@@ -130,7 +128,7 @@ func (s Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 	}
 }
 
-func (s Service) sendReq(num int) (*RemoteResp, error) {
+func (s *Service) sendReq(num int) (*RemoteResp, error) {
 	numStr := strconv.Itoa(num)
 	// Готовим URL
 	fullUrl, err := url.JoinPath(s.cfg.AccrualAddr, "/api/orders/", numStr)
@@ -141,7 +139,7 @@ func (s Service) sendReq(num int) (*RemoteResp, error) {
 
 	remote := RemoteData{}
 
-	client := resty.New()
+	client := s.httpC
 
 	s.logger.Debug("Send to ", fullUrl)
 
