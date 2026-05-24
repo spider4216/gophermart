@@ -69,7 +69,6 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			// Таймер сработал, отправляем запрос
 			s.logger.Debug("Send req to remote")
 			resp, err := s.sendReq(num)
-
 			if err != nil {
 				return 0, err
 			}
@@ -139,7 +138,6 @@ func (s *Service) sendReq(num int) (*RemoteResp, error) {
 	numStr := strconv.Itoa(num)
 	// Готовим URL
 	fullUrl, err := url.JoinPath(s.cfg.AccrualAddr, "/api/orders/", numStr)
-
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +166,6 @@ func (s *Service) sendReq(num int) (*RemoteResp, error) {
 		// Вносим в обертку данные о том, сколько нужно подождать
 		retryStr := resp.Header().Get("Retry-After")
 		retry, err := strconv.Atoi(retryStr)
-
 		if err != nil {
 			return nil, err
 		}
