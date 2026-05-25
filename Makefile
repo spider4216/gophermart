@@ -6,7 +6,7 @@ run:
 	DATABASE_URI=${DATABASE_URI} go run ./cmd/gophermart -l debug
 
 run-acc:
-	go run ./cmd/accrual/accrual_linux_amd64
+	./cmd/accrual/accrual_linux_amd64
 
 test:
 	go test ./...
