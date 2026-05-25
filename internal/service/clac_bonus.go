@@ -49,7 +49,9 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 	// - Прервать опрос со всех гоурутин
 	// - Возобновить опрос во всех гоурутинах через Retry-After
 
-	s.logger.Debug("Start calcing for ", num)
+	userId := s.GetUserIdFromCtx(ctx)
+
+	s.logger.Debug("Start calcing for ", num, " user id ", userId)
 
 	// Создаем таймер
 	ticker := time.NewTicker(1 * time.Second)
@@ -105,25 +107,24 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 
 			// Если статус PROCESSING, то обновляем статус в БД и продолжаем опрос
 			if resp.Data.Status == StatusProcessing {
-				// todo update db status
 				s.logger.Debug("Status PROCESSING, try again...")
+				s.UpdateOrderProcess(ctx, num, userId)
 				continue
 			}
 
 			// Если статус финальный но ошибочный - INVALID, то обновляем статус в БД
 			// и прекращаем работу
 			if resp.Data.Status == StatusInvalid {
-				// todo update db status
-				// Ошибки нет, если вернулась структура но сумма нулевая, значит INVALID
 				s.logger.Debug("Status INVALID, exit...")
+				s.UpdateOrderInvalid(ctx, num, userId)
 				return 0, nil
 			}
 
 			// Если сьатус финальный и не ошибочный - PROCESSED, то обновляем в БД
 			// и прекращаем работу
 			if resp.Data.Status == StatusProcessed {
-				// todo update db status
 				s.logger.Debug("Status PROCESSED, done, exit...")
+				s.UpdateOrderProcessed(ctx, num, userId, resp.Data.Accrual)
 				return resp.Data.Accrual, nil
 			}
 

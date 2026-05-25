@@ -41,6 +41,18 @@ func (s *Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
+func (s *Service) UpdateOrderInvalid(ctx context.Context, orderNum int, userId int64) error {
+	return s.repo.UpdateOrderStatus(ctx, orderNum, userId, models.OrderStatusInvalid, 0)
+}
+
+func (s *Service) UpdateOrderProcessed(ctx context.Context, orderNum int, userId int64, sum float32) error {
+	return s.repo.UpdateOrderStatus(ctx, orderNum, userId, models.OrderStatusProcessed, sum)
+}
+
+func (s *Service) UpdateOrderProcess(ctx context.Context, orderNum int, userId int64) error {
+	return s.repo.UpdateOrderStatus(ctx, orderNum, userId, models.OrderStatusProcess, 0)
+}
+
 func (s *Service) GetOrdersByUserId(ctx context.Context, userId int64) ([]models.Order, error) {
 	return s.repo.GetOrdersByUserId(ctx, userId)
 }

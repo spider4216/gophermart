@@ -3,10 +3,10 @@ package models
 import "time"
 
 const (
-	New       OrderStatus = "NEW"
-	Process   OrderStatus = "PROCESSING"
-	Invalid   OrderStatus = "INVALID"
-	Processed OrderStatus = "PROCESSED"
+	OrderStatusNew       OrderStatus = "NEW"
+	OrderStatusProcess   OrderStatus = "PROCESSING"
+	OrderStatusInvalid   OrderStatus = "INVALID"
+	OrderStatusProcessed OrderStatus = "PROCESSED"
 )
 
 type OrderStatus string

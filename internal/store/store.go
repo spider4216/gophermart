@@ -18,6 +18,7 @@ type Storage interface {
 	CreateOrder(ctx context.Context, order models.Order) (int64, error)
 	GetUserOrder(ctx context.Context, num int, userId int64) (*models.Order, error)
 	GetUserOrders(ctx context.Context, userId int64) ([]models.Order, error)
+	UpdateOrderStatus(ctx context.Context, orderNum int, userId int64, status models.OrderStatus, sum float32) error
 }
 
 func New(driver string, dsn string, logger *zap.SugaredLogger) (Storage, error) {

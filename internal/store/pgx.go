@@ -28,6 +28,16 @@ func (db *PgxStore) Ping(ctx context.Context) error {
 	return db.DB.PingContext(ctx)
 }
 
+func (db *PgxStore) UpdateOrderStatus(ctx context.Context, orderNum int, userId int64, status models.OrderStatus, sum float32) error {
+	sql := "UPDATE orders SET status=$1,accrual=$2 WHERE user_id=$3 AND num=$4"
+
+	if _, err := db.DB.ExecContext(ctx, sql, status, sum, userId, orderNum); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *PgxStore) GetUserOrders(ctx context.Context, userId int64) ([]models.Order, error) {
 	sql := "SELECT id,user_id,num,status,accrual,created_at,updated_at FROM orders WHERE user_id=$1"
 
