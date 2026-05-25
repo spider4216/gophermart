@@ -18,6 +18,7 @@ type Config struct {
 	MaxBodySize  int64         `env:"MAX_BODY_SIZE" envDefault:"2048"`
 	ExpToken     time.Duration `env:"TOKEN_EXPIRE" envDefault:"1h"`
 	SecretKey    string        `env:"SECRET_KEY" envDefault:"qwerty"`
+	RegMaxPool   int           `env:"REG_MAX_POOL" envDefault:"10"`
 }
 
 func New() (*Config, error) {

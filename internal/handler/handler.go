@@ -17,16 +17,18 @@ import (
 
 func New(cfg *config.Config, logger *zap.SugaredLogger, service *service.Service) Handler {
 	return Handler{
-		cfg:     cfg,
-		service: service,
-		logger:  logger,
+		cfg:       cfg,
+		service:   service,
+		logger:    logger,
+		semaphore: make(chan struct{}, cfg.RegMaxPool),
 	}
 }
 
 type Handler struct {
-	cfg     *config.Config
-	service *service.Service
-	logger  *zap.SugaredLogger
+	cfg       *config.Config
+	service   *service.Service
+	logger    *zap.SugaredLogger
+	semaphore chan struct{}
 }
 
 func (h Handler) Ping(w http.ResponseWriter, r *http.Request) {
@@ -154,12 +156,22 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 
 	withoutCancel := context.WithoutCancel(r.Context())
 
-	// todo Незабыть ограничить кол-во Go-рутин через паттерн типа woorking pool
-	go func() {
-		if _, err := h.service.CalcBonus(withoutCancel, num); err != nil {
-			h.logger.Error("Cannot calc", zap.Error(err))
-		}
-	}()
+	select {
+	case h.semaphore <- struct{}{}:
+		go func() {
+			defer func() {
+				h.logger.Debug("Release pool in reg order")
+				<-h.semaphore
+			}()
+			if _, err := h.service.CalcBonus(withoutCancel, num); err != nil {
+				h.logger.Error("Cannot calc", zap.Error(err))
+			}
+		}()
+	default:
+		h.logger.Error("Too many requests for reg orders.")
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
 
 	w.WriteHeader(http.StatusAccepted)
 }
