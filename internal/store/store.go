@@ -19,6 +19,9 @@ type Storage interface {
 	GetUserOrder(ctx context.Context, num int, userId int64) (*models.Order, error)
 	GetUserOrders(ctx context.Context, userId int64) ([]models.Order, error)
 	UpdateOrderStatus(ctx context.Context, orderNum int, userId int64, status models.OrderStatus, sum float32) error
+	CreateUserBalance(ctx context.Context, userId int64) (int64, error)
+	UpdateUserBalance(ctx context.Context, userId int64, amount float32) error
+	GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error)
 }
 
 func New(driver string, dsn string, logger *zap.SugaredLogger) (Storage, error) {

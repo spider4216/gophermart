@@ -28,6 +28,45 @@ func (db *PgxStore) Ping(ctx context.Context) error {
 	return db.DB.PingContext(ctx)
 }
 
+func (db *PgxStore) GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error) {
+	sql := "SELECT id,user_id,balance FROM balances WHERE user_id=$1"
+
+	balance := models.Balance{}
+
+	err := db.DB.QueryRow(sql, userId).Scan(&balance.ID, &balance.UserId, &balance.Balance)
+	if err != nil {
+		return nil, err
+	}
+
+	return &balance, nil
+}
+
+func (db *PgxStore) UpdateUserBalance(ctx context.Context, userId int64, amount float32) error {
+	sql := "UPDATE balance SET amount=$1 WHERE user_id=$2"
+
+	if _, err := db.DB.ExecContext(ctx, sql, amount, userId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *PgxStore) CreateUserBalance(ctx context.Context, userId int64) (int64, error) {
+	sql := "INSERT INTO balances (user_id,amount) VALUES ($1,0)"
+
+	res, err := db.DB.ExecContext(ctx, sql, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
 func (db *PgxStore) UpdateOrderStatus(ctx context.Context, orderNum int, userId int64, status models.OrderStatus, sum float32) error {
 	sql := "UPDATE orders SET status=$1,accrual=$2 WHERE user_id=$3 AND num=$4"
 
@@ -110,7 +149,7 @@ func (db *PgxStore) CreateOrder(ctx context.Context, order models.Order) (int64,
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return id, nil
@@ -126,7 +165,7 @@ func (db *PgxStore) CreateUser(ctx context.Context, user models.User) (int64, er
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return id, nil

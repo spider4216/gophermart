@@ -31,24 +31,6 @@ type RemoteData struct {
 }
 
 func (s *Service) CalcBonus(ctx context.Context, num int) error {
-	// 1. Отправка запроса в систему лояльности
-	// GET /api/orders/{number}
-	// 2. Ожидание финального статуса
-	// Финальные:
-	// - INVALID - обновить статус в таблице и прекратить опрос
-	// - PROCESSED - обновить статус и начислить бонус и прекратить опрос
-	//
-	// Не финальные статусы
-	// - REGISTERED - ничего не обновлять, продолжать опрос
-	// - PROCESSING - Обновить со статуса NEW -> PROCESSING и продолжать опрос
-	// Негативные сценарии
-	// - HTTP 204 заказ не зарегистрирован в системе расчёта
-	// - HTTP 429 превышено количество запросов к сервису.
-	// При HTTP 429 Too Many Requests
-	// - Обратить внимание на заголовок Retry-After
-	// - Прервать опрос со всех гоурутин
-	// - Возобновить опрос во всех гоурутинах через Retry-After
-
 	userId := s.GetUserIdFromCtx(ctx)
 
 	s.logger.Debug("Start calcing for ", num, " user id ", userId)
@@ -131,6 +113,12 @@ func (s *Service) CalcBonus(ctx context.Context, num int) error {
 			if resp.Data.Status == StatusProcessed {
 				s.logger.Debug("Status PROCESSED, done, exit...")
 				if err := s.UpdateOrderProcessed(ctx, num, userId, resp.Data.Accrual); err != nil {
+					return err
+				}
+
+				s.logger.Debug("Increase user balance +", resp.Data.Accrual)
+				// todo transaction
+				if err := s.IncreaseUserBalance(ctx, userId, resp.Data.Accrual); err != nil {
 					return err
 				}
 

@@ -266,6 +266,13 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// todo создавать пользователя и его баланс нужно в транзакции
+	if _, err := h.service.CreateUserBalance(ctx, id); err != nil {
+		h.logger.Error("cannot create user balance", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	// Авторизация
 	token, err := h.service.BuildJWTString(id, h.cfg.SecretKey, h.cfg.ExpToken)
 	if err != nil {

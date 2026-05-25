@@ -21,6 +21,18 @@ func (r *Repository) Ping(ctx context.Context) error {
 	return r.store.Ping(ctx)
 }
 
+func (r *Repository) GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error) {
+	return r.store.GetUserBalance(ctx, userId)
+}
+
+func (r *Repository) UpdateUserBalance(ctx context.Context, userId int64, amount float32) error {
+	return r.store.UpdateUserBalance(ctx, userId, amount)
+}
+
+func (r *Repository) CreateUserBalance(ctx context.Context, userId int64) (int64, error) {
+	return r.store.CreateUserBalance(ctx, userId)
+}
+
 func (r *Repository) UpdateOrderStatus(ctx context.Context, orderNum int, userId int64, status models.OrderStatus, sum float32) error {
 	return r.store.UpdateOrderStatus(ctx, orderNum, userId, status, sum)
 }
