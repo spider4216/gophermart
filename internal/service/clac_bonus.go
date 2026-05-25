@@ -30,7 +30,7 @@ type RemoteData struct {
 	Accrual float32 `json:"accrual"`
 }
 
-func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
+func (s *Service) CalcBonus(ctx context.Context, num int) error {
 	// 1. Отправка запроса в систему лояльности
 	// GET /api/orders/{number}
 	// 2. Ожидание финального статуса
@@ -63,7 +63,7 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 		// Которая запускается при Retry Timeout
 		// Если пауза установлена, то ожидаем разблокировки
 		if err := s.checkPause(ctx); err != nil {
-			return 0, err
+			return err
 		}
 
 		select {
@@ -72,7 +72,7 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			s.logger.Debug("Send req to remote")
 			resp, err := s.sendReq(num)
 			if err != nil {
-				return 0, err
+				return err
 			}
 
 			// Если уперлись в лимит времени, то ожидаем
@@ -89,13 +89,13 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			// Если 204, то заказ не зарегистрирован
 			if resp.StatusCode == http.StatusNoContent {
 				s.logger.Error("Order was not registered")
-				return 0, fmt.Errorf("order was not registered")
+				return fmt.Errorf("order was not registered")
 			}
 
 			// Если статус не 200, то какая-то ошибка
 			if resp.StatusCode != http.StatusOK {
 				s.logger.Error("Something went wrong on remote side")
-				return 0, fmt.Errorf("something went wrong on remote side")
+				return fmt.Errorf("something went wrong on remote side")
 			}
 
 			// Заказ обработан успешно, начинаем отслеживать статусы
@@ -108,7 +108,10 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			// Если статус PROCESSING, то обновляем статус в БД и продолжаем опрос
 			if resp.Data.Status == StatusProcessing {
 				s.logger.Debug("Status PROCESSING, try again...")
-				s.UpdateOrderProcess(ctx, num, userId)
+				if err := s.UpdateOrderProcess(ctx, num, userId); err != nil {
+					return err
+				}
+
 				continue
 			}
 
@@ -116,21 +119,27 @@ func (s *Service) CalcBonus(ctx context.Context, num int) (float32, error) {
 			// и прекращаем работу
 			if resp.Data.Status == StatusInvalid {
 				s.logger.Debug("Status INVALID, exit...")
-				s.UpdateOrderInvalid(ctx, num, userId)
-				return 0, nil
+				if err := s.UpdateOrderInvalid(ctx, num, userId); err != nil {
+					return err
+				}
+
+				return nil
 			}
 
 			// Если сьатус финальный и не ошибочный - PROCESSED, то обновляем в БД
 			// и прекращаем работу
 			if resp.Data.Status == StatusProcessed {
 				s.logger.Debug("Status PROCESSED, done, exit...")
-				s.UpdateOrderProcessed(ctx, num, userId, resp.Data.Accrual)
-				return resp.Data.Accrual, nil
+				if err := s.UpdateOrderProcessed(ctx, num, userId, resp.Data.Accrual); err != nil {
+					return err
+				}
+
+				return nil
 			}
 
 		case <-ctx.Done():
 			s.logger.Debug("Context in remote polling was canceled")
-			return 0, fmt.Errorf("context wac canceled")
+			return fmt.Errorf("context wac canceled")
 		}
 	}
 }

@@ -163,7 +163,7 @@ func (h Handler) RegOrder(w http.ResponseWriter, r *http.Request) {
 				h.logger.Debug("Release pool in reg order")
 				<-h.semaphore
 			}()
-			if _, err := h.service.CalcBonus(withoutCancel, num); err != nil {
+			if err := h.service.CalcBonus(withoutCancel, num); err != nil {
 				h.logger.Error("Cannot calc", zap.Error(err))
 			}
 		}()
