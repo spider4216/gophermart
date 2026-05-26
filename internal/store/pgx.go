@@ -29,7 +29,7 @@ func (db *PgxStore) Ping(ctx context.Context) error {
 }
 
 func (db *PgxStore) GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error) {
-	sql := "SELECT id,user_id,balance FROM balances WHERE user_id=$1"
+	sql := "SELECT id,user_id,amount FROM balances WHERE user_id=$1"
 
 	balance := models.Balance{}
 
@@ -42,7 +42,7 @@ func (db *PgxStore) GetUserBalance(ctx context.Context, userId int64) (*models.B
 }
 
 func (db *PgxStore) UpdateUserBalance(ctx context.Context, userId int64, amount float32) error {
-	sql := "UPDATE balance SET amount=$1 WHERE user_id=$2"
+	sql := "UPDATE balances SET amount=$1 WHERE user_id=$2"
 
 	if _, err := db.DB.ExecContext(ctx, sql, amount, userId); err != nil {
 		return err
@@ -52,15 +52,11 @@ func (db *PgxStore) UpdateUserBalance(ctx context.Context, userId int64, amount 
 }
 
 func (db *PgxStore) CreateUserBalance(ctx context.Context, userId int64) (int64, error) {
-	sql := "INSERT INTO balances (user_id,amount) VALUES ($1,0)"
+	sql := "INSERT INTO balances (user_id,amount) VALUES ($1,0) RETURNING id"
 
-	res, err := db.DB.ExecContext(ctx, sql, userId)
-	if err != nil {
-		return 0, err
-	}
+	var id int64
 
-	id, err := res.LastInsertId()
-	if err != nil {
+	if err := db.DB.QueryRowContext(ctx, sql, userId).Scan(&id); err != nil {
 		return 0, err
 	}
 
@@ -140,15 +136,11 @@ func (db *PgxStore) GetUserOrder(ctx context.Context, num int, userId int64) (*m
 }
 
 func (db *PgxStore) CreateOrder(ctx context.Context, order models.Order) (int64, error) {
-	sql := "INSERT INTO orders (user_id,num,status) VALUES ($1,$2,$3)"
+	sql := "INSERT INTO orders (user_id,num,status) VALUES ($1,$2,$3) RETURNING id"
 
-	res, err := db.DB.ExecContext(ctx, sql, order.UserId, order.Num, order.Status)
-	if err != nil {
-		return 0, err
-	}
+	var id int64
 
-	id, err := res.LastInsertId()
-	if err != nil {
+	if err := db.DB.QueryRowContext(ctx, sql, order.UserId, order.Num, order.Status).Scan(&id); err != nil {
 		return 0, err
 	}
 
@@ -156,15 +148,11 @@ func (db *PgxStore) CreateOrder(ctx context.Context, order models.Order) (int64,
 }
 
 func (db *PgxStore) CreateUser(ctx context.Context, user models.User) (int64, error) {
-	sql := "INSERT INTO users (username,password) VALUES ($1,$2)"
+	sql := "INSERT INTO users (username,password) VALUES ($1,$2) RETURNING id"
 
-	res, err := db.DB.ExecContext(ctx, sql, user.Username, user.Password)
-	if err != nil {
-		return 0, err
-	}
+	var id int64
 
-	id, err := res.LastInsertId()
-	if err != nil {
+	if err := db.DB.QueryRowContext(ctx, sql, user.Username, user.Password).Scan(&id); err != nil {
 		return 0, err
 	}
 
