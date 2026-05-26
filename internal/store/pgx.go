@@ -171,3 +171,7 @@ func (db *PgxStore) GetUser(ctx context.Context, username string) (*models.User,
 
 	return &user, nil
 }
+
+func (db *PgxStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return db.DB.BeginTx(ctx, nil)
+}

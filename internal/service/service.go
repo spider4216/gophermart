@@ -89,6 +89,39 @@ func (s *Service) CreateOrder(ctx context.Context, userId int64, num int) (int64
 	return s.repo.CreateOrder(ctx, userId, num)
 }
 
+// Комплексный метод создания пользователя, включает след. операции
+// - Создание нового пользователя
+// - Создание нулевого баланса для нового пользователя
+func (s *Service) CreateUser(ctx context.Context, username string, pass string) (int64, error) {
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	userId, err := s.SignUpUser(ctx, username, pass)
+	if err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return 0, terr
+		}
+
+		return 0, err
+	}
+
+	if _, err = s.CreateUserBalance(ctx, userId); err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return 0, terr
+		}
+
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
+	return userId, nil
+}
+
 func (s *Service) SignUpUser(ctx context.Context, username string, pass string) (int64, error) {
 	hash := sha256.Sum256([]byte(pass))
 

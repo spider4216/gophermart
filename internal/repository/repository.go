@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/spider4216/gophermart/internal/models"
 	"github.com/spider4216/gophermart/internal/store"
@@ -19,6 +20,10 @@ type Repository struct {
 
 func (r *Repository) Ping(ctx context.Context) error {
 	return r.store.Ping(ctx)
+}
+
+func (r *Repository) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return r.store.BeginTx(ctx)
 }
 
 func (r *Repository) GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error) {

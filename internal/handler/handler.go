@@ -252,7 +252,7 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Регистрация пользователя
-	id, err := h.service.SignUpUser(ctx, req.Login, req.Password)
+	id, err := h.service.CreateUser(ctx, req.Login, req.Password)
 	if err != nil {
 		// Если ошибка является дубликатом
 		if err != nil && h.service.IsErrAsDuplicate(err) {
@@ -262,13 +262,6 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 
 		h.logger.Error("cannot create user", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	// todo создавать пользователя и его баланс нужно в транзакции
-	if _, err := h.service.CreateUserBalance(ctx, id); err != nil {
-		h.logger.Error("cannot create user balance", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/spider4216/gophermart/internal/models"
 	"go.uber.org/zap"
@@ -22,6 +23,7 @@ type Storage interface {
 	CreateUserBalance(ctx context.Context, userId int64) (int64, error)
 	UpdateUserBalance(ctx context.Context, userId int64, amount float32) error
 	GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error)
+	BeginTx(ctx context.Context) (*sql.Tx, error)
 }
 
 func New(driver string, dsn string, logger *zap.SugaredLogger) (Storage, error) {
