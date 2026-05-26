@@ -109,16 +109,11 @@ func (s *Service) CalcBonus(ctx context.Context, num int) error {
 			}
 
 			// Если сьатус финальный и не ошибочный - PROCESSED, то обновляем в БД
-			// и прекращаем работу
+			// статус, увеличиваем баланс и прекращаем работу
 			if resp.Data.Status == StatusProcessed {
 				s.logger.Debug("Status PROCESSED, done, exit...")
-				if err := s.UpdateOrderProcessed(ctx, num, userId, resp.Data.Accrual); err != nil {
-					return err
-				}
 
-				s.logger.Debug("Increase user balance +", resp.Data.Accrual)
-				// todo transaction
-				if err := s.IncreaseUserBalance(ctx, userId, resp.Data.Accrual); err != nil {
+				if err := s.processedCalc(ctx, num, userId, resp.Data.Accrual); err != nil {
 					return err
 				}
 
@@ -130,6 +125,36 @@ func (s *Service) CalcBonus(ctx context.Context, num int) error {
 			return fmt.Errorf("context wac canceled")
 		}
 	}
+}
+
+// Финализируем бонус
+// - Обновляем статус
+// - Увеличиваем баланс
+func (s *Service) processedCalc(ctx context.Context, num int, userId int64, accrual float32) error {
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := s.UpdateOrderProcessed(ctx, num, userId, accrual); err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return terr
+		}
+
+		return err
+	}
+
+	s.logger.Debug("Increase user balance +", accrual)
+
+	if err := s.IncreaseUserBalance(ctx, userId, accrual); err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return terr
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) sendReq(num int) (*RemoteResp, error) {
