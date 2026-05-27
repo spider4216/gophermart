@@ -40,6 +40,7 @@ func main() {
 		r.With(middlewares.WithJwt).Post("/api/user/orders", http.HandlerFunc(handler.RegOrder))
 		r.With(middlewares.WithJwt).Get("/api/user/orders", http.HandlerFunc(handler.GetUserOrders))
 		r.With(middlewares.WithJwt).Post("/api/user/balance/withdraw", http.HandlerFunc(handler.Withdraw))
+		r.With(middlewares.WithJwt).Get("/api/user/withdrawals", http.HandlerFunc(handler.GetUserWithdrawals))
 	})
 
 	srv := &http.Server{

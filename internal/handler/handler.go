@@ -106,6 +106,45 @@ func (h Handler) Withdraw(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// История списания бонусов у пользователя
+func (h Handler) GetUserWithdrawals(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), h.cfg.CtxTimeout)
+
+	defer cancel()
+
+	userId := h.service.GetUserIdFromCtx(ctx)
+
+	h.logger.Debug("User ID ", userId)
+
+	withdrawals, err := h.service.GetUserWithdrawals(ctx, userId)
+	if err != nil {
+		h.logger.Error("cannot get user withdrawals", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if len(withdrawals) <= 0 {
+		h.logger.Error("No withdrawals found")
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	resp := h.mapWithdrawalsResp(withdrawals)
+
+	b, err := json.Marshal(resp)
+	if err != nil {
+		h.logger.Error("cannot marshal response", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write(b); err != nil {
+		h.logger.Error("Cannot write response", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 func (h Handler) GetUserOrders(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.cfg.CtxTimeout)
 

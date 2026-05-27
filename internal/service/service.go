@@ -47,6 +47,10 @@ func (s *Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
+func (s *Service) GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error) {
+	return s.repo.GetUserWithdrawals(ctx, userId)
+}
+
 // Метод списания бонусов
 // - Получает текущий баланс пользователя
 // - Проверяет возможность списания через остаток

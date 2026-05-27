@@ -182,6 +182,45 @@ func (db *PgxStore) Withdraw(ctx context.Context, userId int64, num int, amount 
 	return nil
 }
 
+func (db *PgxStore) GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error) {
+	sql := "SELECT id,user_id,order_num,amount,created_at FROM withdrawals WHERE user_id=$1 ORDER BY created_at DESC"
+
+	rows, err := db.DB.QueryContext(ctx, sql, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			db.logger.Warn("Cannot close rows", zap.Error(err))
+		}
+	}()
+
+	var items []models.Withdrawal
+
+	for rows.Next() {
+		var item models.Withdrawal
+
+		if err := rows.Scan(
+			&item.ID,
+			&item.UserId,
+			&item.OrderNum,
+			&item.Amount,
+			&item.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
 func (db *PgxStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
 	return db.DB.BeginTx(ctx, nil)
 }

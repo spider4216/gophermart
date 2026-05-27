@@ -16,3 +16,17 @@ func (h Handler) mapOrdersResp(orders []models.Order) []models.OrderResp {
 
 	return resp
 }
+
+func (h Handler) mapWithdrawalsResp(withdrawals []models.Withdrawal) []models.WithdrawalsResp {
+	var resp []models.WithdrawalsResp
+
+	for _, withdrawal := range withdrawals {
+		resp = append(resp, models.WithdrawalsResp{
+			Order:       withdrawal.OrderNum,
+			Sum:         withdrawal.Amount,
+			ProcessedAt: withdrawal.CreatedAt,
+		})
+	}
+
+	return resp
+}
