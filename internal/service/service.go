@@ -47,6 +47,22 @@ func (s *Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
 }
 
+func (s *Service) GetUserBalanceWithWithdrawn(ctx context.Context, userId int64) (*models.Balance, float32, error) {
+	// Получить текущий баланс пользователя
+	balance, err := s.GetUserBalance(ctx, userId)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Получить все списания бонусов пользователя
+	withdrawn, err := s.repo.GetTotalUserWithdrawn(ctx, userId)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return balance, withdrawn, nil
+}
+
 func (s *Service) GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error) {
 	return s.repo.GetUserWithdrawals(ctx, userId)
 }

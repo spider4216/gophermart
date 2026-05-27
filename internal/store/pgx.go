@@ -221,6 +221,19 @@ func (db *PgxStore) GetUserWithdrawals(ctx context.Context, userId int64) ([]mod
 	return items, nil
 }
 
+func (db *PgxStore) GetTotalUserWithdrawn(ctx context.Context, userId int64) (float32, error) {
+	sql := "SELECT COALESCE(SUM(amount), 0) FROM withdrawals WHERE user_id=$1"
+
+	var sum float32
+
+	err := db.DB.QueryRow(sql, userId).Scan(&sum)
+	if err != nil {
+		return 0, err
+	}
+
+	return sum, nil
+}
+
 func (db *PgxStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
 	return db.DB.BeginTx(ctx, nil)
 }

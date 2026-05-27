@@ -26,6 +26,10 @@ func (r *Repository) BeginTx(ctx context.Context) (*sql.Tx, error) {
 	return r.store.BeginTx(ctx)
 }
 
+func (r *Repository) GetTotalUserWithdrawn(ctx context.Context, userId int64) (float32, error) {
+	return r.store.GetTotalUserWithdrawn(ctx, userId)
+}
+
 func (r *Repository) GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error) {
 	return r.store.GetUserWithdrawals(ctx, userId)
 }

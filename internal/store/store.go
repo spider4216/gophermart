@@ -26,6 +26,7 @@ type Storage interface {
 	Withdraw(ctx context.Context, userId int64, num int, amount float32) error
 	BeginTx(ctx context.Context) (*sql.Tx, error)
 	GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error)
+	GetTotalUserWithdrawn(ctx context.Context, userId int64) (float32, error)
 }
 
 func New(driver string, dsn string, logger *zap.SugaredLogger) (Storage, error) {
