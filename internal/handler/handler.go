@@ -74,7 +74,6 @@ func (h Handler) Withdraw(w http.ResponseWriter, r *http.Request) {
 	}
 
 	orderNum, err := strconv.Atoi(req.Order)
-
 	if err != nil {
 		h.logger.Error("Order is not number", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)

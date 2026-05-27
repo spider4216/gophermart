@@ -54,13 +54,11 @@ func (s *Service) Ping(ctx context.Context) error {
 // - Обновляет баланс
 func (s *Service) Withdraw(ctx context.Context, userId int64, num int, amount float32) error {
 	tx, err := s.repo.BeginTx(ctx)
-
 	if err != nil {
 		return err
 	}
 
 	balance, err := s.GetUserBalance(ctx, userId)
-
 	if err != nil {
 		if terr := tx.Rollback(); terr != nil {
 			return terr
