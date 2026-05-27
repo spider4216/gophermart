@@ -23,6 +23,7 @@ type Storage interface {
 	CreateUserBalance(ctx context.Context, userId int64) (int64, error)
 	UpdateUserBalance(ctx context.Context, userId int64, amount float32) error
 	GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error)
+	Withdraw(ctx context.Context, userId int64, num int, amount float32) error
 	BeginTx(ctx context.Context) (*sql.Tx, error)
 }
 

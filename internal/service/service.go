@@ -37,8 +37,68 @@ type Service struct {
 	isPaused  bool          // Флаг, пригодится в горутинах, чтобы понимать нужно ли ожидать
 }
 
+type NoBalance struct{}
+
+func (e *NoBalance) Error() string {
+	return "No balance for operation"
+}
+
 func (s *Service) Ping(ctx context.Context) error {
 	return s.repo.Ping(ctx)
+}
+
+// Метод списания бонусов
+// - Получает текущий баланс пользователя
+// - Проверяет возможность списания через остаток
+// - Создает списание
+// - Обновляет баланс
+func (s *Service) Withdraw(ctx context.Context, userId int64, num int, amount float32) error {
+	tx, err := s.repo.BeginTx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	balance, err := s.GetUserBalance(ctx, userId)
+
+	if err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return terr
+		}
+
+		return err
+	}
+
+	remain := balance.Balance - amount
+
+	s.logger.Debug("withdraw: ", amount, " user ", userId, " balance: ", balance.Balance, " remain: ", remain)
+
+	// Если баланса недостаточно
+	if remain < 0 {
+		// Свой тип ошибки
+		s.logger.Error("No balance for withdraw ", amount, " Current balance ", balance.Balance)
+		return &NoBalance{}
+	}
+
+	// Создаем списание
+	if err := s.repo.Withdraw(ctx, userId, num, amount); err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return terr
+		}
+
+		return err
+	}
+
+	// Обновляем баланс
+	if err := s.repo.UpdateUserBalance(ctx, userId, remain); err != nil {
+		if terr := tx.Rollback(); terr != nil {
+			return terr
+		}
+
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (s *Service) IncreaseUserBalance(ctx context.Context, userId int64, amount float32) error {

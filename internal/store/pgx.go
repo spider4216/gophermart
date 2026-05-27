@@ -172,6 +172,16 @@ func (db *PgxStore) GetUser(ctx context.Context, username string) (*models.User,
 	return &user, nil
 }
 
+func (db *PgxStore) Withdraw(ctx context.Context, userId int64, num int, amount float32) error {
+	sql := "INSERT INTO withdrawals (user_id,order_num,amount) VALUES ($1,$2,$3)"
+
+	if _, err := db.DB.ExecContext(ctx, sql, userId, num, amount); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *PgxStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
 	return db.DB.BeginTx(ctx, nil)
 }
