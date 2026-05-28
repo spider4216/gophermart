@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/spider4216/gophermart/internal/models"
 	"github.com/spider4216/gophermart/internal/store"
 )
 
@@ -24,63 +23,4 @@ func (r *Repository) Ping(ctx context.Context) error {
 
 func (r *Repository) BeginTx(ctx context.Context) (*sql.Tx, error) {
 	return r.store.BeginTx(ctx)
-}
-
-func (r *Repository) GetTotalUserWithdrawn(ctx context.Context, userId int64) (float32, error) {
-	return r.store.GetTotalUserWithdrawn(ctx, userId)
-}
-
-func (r *Repository) GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error) {
-	return r.store.GetUserWithdrawals(ctx, userId)
-}
-
-func (r *Repository) Withdraw(ctx context.Context, userId int64, num int, amount float32) error {
-	return r.store.Withdraw(ctx, userId, num, amount)
-}
-
-func (r *Repository) GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error) {
-	return r.store.GetUserBalance(ctx, userId)
-}
-
-func (r *Repository) UpdateUserBalance(ctx context.Context, userId int64, amount float32) error {
-	return r.store.UpdateUserBalance(ctx, userId, amount)
-}
-
-func (r *Repository) CreateUserBalance(ctx context.Context, userId int64) (int64, error) {
-	return r.store.CreateUserBalance(ctx, userId)
-}
-
-func (r *Repository) UpdateOrderStatus(ctx context.Context, orderNum int, userId int64, status models.OrderStatus, sum float32) error {
-	return r.store.UpdateOrderStatus(ctx, orderNum, userId, status, sum)
-}
-
-func (r *Repository) GetOrdersByUserId(ctx context.Context, userId int64) ([]models.Order, error) {
-	return r.store.GetUserOrders(ctx, userId)
-}
-
-func (r *Repository) GetOrderByUserId(ctx context.Context, num int, userId int64) (*models.Order, error) {
-	return r.store.GetUserOrder(ctx, num, userId)
-}
-
-func (r *Repository) CreateOrder(ctx context.Context, userId int64, num int) (int64, error) {
-	order := models.Order{
-		UserId: userId,
-		Num:    num,
-		Status: models.OrderStatusNew,
-	}
-
-	return r.store.CreateOrder(ctx, order)
-}
-
-func (r *Repository) CreateUser(ctx context.Context, username string, hash string) (int64, error) {
-	user := models.User{
-		Username: username,
-		Password: hash,
-	}
-
-	return r.store.CreateUser(ctx, user)
-}
-
-func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	return r.store.GetUser(ctx, username)
 }

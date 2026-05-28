@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL REFERENCES users(id),
     num BIGINT UNIQUE NOT NULL,
     status VARCHAR(50) NOT NULL,
     accrual FLOAT NOT NULL DEFAULT 0,

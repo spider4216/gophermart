@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS balances (
     id SERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL REFERENCES users(id),
     amount FLOAT NOT NULL
 );
 
