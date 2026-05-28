@@ -1,13 +1,17 @@
 package handler
 
-import "github.com/spider4216/gophermart/internal/models"
+import (
+	"strconv"
+
+	"github.com/spider4216/gophermart/internal/models"
+)
 
 func (h Handler) mapOrdersResp(orders []models.Order) []models.OrderResp {
 	var resp []models.OrderResp
 
 	for _, order := range orders {
 		resp = append(resp, models.OrderResp{
-			Number:     order.Num,
+			Number:     strconv.Itoa(order.Num),
 			Status:     string(order.Status),
 			Accrual:    order.Accrual,
 			UploadedAt: order.UpdatedAt,
@@ -22,7 +26,7 @@ func (h Handler) mapWithdrawalsResp(withdrawals []models.Withdrawal) []models.Wi
 
 	for _, withdrawal := range withdrawals {
 		resp = append(resp, models.WithdrawalsResp{
-			Order:       withdrawal.OrderNum,
+			Order:       strconv.Itoa(withdrawal.OrderNum),
 			Sum:         withdrawal.Amount,
 			ProcessedAt: withdrawal.CreatedAt,
 		})

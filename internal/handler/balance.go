@@ -38,6 +38,7 @@ func (h Handler) GetUserBalanceAndWithdrawn(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write(b); err != nil {
 		h.logger.Error("Cannot write response", zap.Error(err))
