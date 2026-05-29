@@ -137,13 +137,13 @@ func (app *app) initStore() error {
 func (app *app) initMigrations() error {
 	app.logger.Debug("Up migrations")
 
-	st, ok := app.store.(*store.PgxStore)
+	st, ok := app.store.(store.Migratable)
 
 	if !ok {
 		return fmt.Errorf("cannot cast to pgx store type in init migration")
 	}
 
-	if err := migrations.Run(st.DB); err != nil {
+	if err := migrations.Run(st.GetDB()); err != nil {
 		return err
 	}
 

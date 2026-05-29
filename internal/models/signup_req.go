@@ -1,6 +1,6 @@
 package models
 
-type SugnUpReq struct {
+type SignUpReq struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }

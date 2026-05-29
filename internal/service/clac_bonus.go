@@ -154,7 +154,7 @@ func (s *Service) processedCalc(ctx context.Context, num int, userId int64, accr
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (s *Service) sendReq(num int) (*RemoteResp, error) {

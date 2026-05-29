@@ -77,7 +77,7 @@ func (h Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req := models.SugnUpReq{}
+	req := models.SignUpReq{}
 
 	if err := json.Unmarshal(body, &req); err != nil {
 		h.logger.Error("failed read unmarshal", zap.Error(err))

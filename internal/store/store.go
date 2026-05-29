@@ -12,6 +12,10 @@ const (
 	PostgreDriver = "pgx"
 )
 
+type Migratable interface {
+	GetDB() *sql.DB
+}
+
 type Storage interface {
 	Ping(ctx context.Context) error
 	CreateUser(ctx context.Context, user models.User) (int64, error)

@@ -33,7 +33,7 @@ func (db *PgxStore) GetUserBalance(ctx context.Context, userId int64) (*models.B
 
 	balance := models.Balance{}
 
-	err := db.DB.QueryRow(sql, userId).Scan(&balance.ID, &balance.UserId, &balance.Balance)
+	err := db.DB.QueryRow(sql, userId).Scan(&balance.ID, &balance.UserID, &balance.Balance)
 	if err != nil {
 		return nil, err
 	}
@@ -236,4 +236,8 @@ func (db *PgxStore) GetTotalUserWithdrawn(ctx context.Context, userId int64) (fl
 
 func (db *PgxStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
 	return db.DB.BeginTx(ctx, nil)
+}
+
+func (db *PgxStore) GetDB() *sql.DB {
+	return db.DB
 }
