@@ -234,7 +234,7 @@ func (db *PgxStore) GetTotalUserWithdrawn(ctx context.Context, userId int64) (fl
 	return sum, nil
 }
 
-func (db *PgxStore) BeginTx(ctx context.Context) (*sql.Tx, error) {
+func (db *PgxStore) BeginTx(ctx context.Context) (Tx, error) {
 	return db.DB.BeginTx(ctx, nil)
 }
 

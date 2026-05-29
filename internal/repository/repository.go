@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/spider4216/gophermart/internal/store"
 )
@@ -21,6 +20,6 @@ func (r *Repository) Ping(ctx context.Context) error {
 	return r.store.Ping(ctx)
 }
 
-func (r *Repository) BeginTx(ctx context.Context) (*sql.Tx, error) {
+func (r *Repository) BeginTx(ctx context.Context) (store.Tx, error) {
 	return r.store.BeginTx(ctx)
 }

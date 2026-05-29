@@ -16,6 +16,11 @@ type Migratable interface {
 	GetDB() *sql.DB
 }
 
+type Tx interface {
+	Commit() error
+	Rollback() error
+}
+
 type Storage interface {
 	Ping(ctx context.Context) error
 	CreateUser(ctx context.Context, user models.User) (int64, error)
@@ -28,7 +33,7 @@ type Storage interface {
 	UpdateUserBalance(ctx context.Context, userId int64, amount float32) error
 	GetUserBalance(ctx context.Context, userId int64) (*models.Balance, error)
 	Withdraw(ctx context.Context, userId int64, num int, amount float32) error
-	BeginTx(ctx context.Context) (*sql.Tx, error)
+	BeginTx(ctx context.Context) (Tx, error)
 	GetUserWithdrawals(ctx context.Context, userId int64) ([]models.Withdrawal, error)
 	GetTotalUserWithdrawn(ctx context.Context, userId int64) (float32, error)
 }
