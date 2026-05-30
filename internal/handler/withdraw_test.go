@@ -43,7 +43,7 @@ func TestGetUserWithdrawals(t *testing.T) {
 	data := []models.Withdrawal{
 		{
 			ID:        1,
-			UserId:    1,
+			UserID:    1,
 			OrderNum:  num,
 			Amount:    150,
 			CreatedAt: time.Now(),

@@ -43,7 +43,7 @@ func TestGetGetUserOrders(t *testing.T) {
 	data := []models.Order{
 		{
 			ID:        1,
-			UserId:    1,
+			UserID:    1,
 			Num:       num,
 			Status:    models.OrderStatusProcessed,
 			Accrual:   50,

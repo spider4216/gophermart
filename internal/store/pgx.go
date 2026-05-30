@@ -94,7 +94,7 @@ func (db *PgxStore) GetUserOrders(ctx context.Context, userId int64) ([]models.O
 
 		if err := rows.Scan(
 			&item.ID,
-			&item.UserId,
+			&item.UserID,
 			&item.Num,
 			&item.Status,
 			&item.Accrual,
@@ -121,7 +121,7 @@ func (db *PgxStore) GetUserOrder(ctx context.Context, num int, userId int64) (*m
 
 	err := db.DB.QueryRow(sql, num, userId).Scan(
 		&order.ID,
-		&order.UserId,
+		&order.UserID,
 		&order.Num,
 		&order.Status,
 		&order.Accrual,
@@ -140,7 +140,7 @@ func (db *PgxStore) CreateOrder(ctx context.Context, order models.Order) (int64,
 
 	var id int64
 
-	if err := db.DB.QueryRowContext(ctx, sql, order.UserId, order.Num, order.Status).Scan(&id); err != nil {
+	if err := db.DB.QueryRowContext(ctx, sql, order.UserID, order.Num, order.Status).Scan(&id); err != nil {
 		return 0, err
 	}
 
@@ -203,7 +203,7 @@ func (db *PgxStore) GetUserWithdrawals(ctx context.Context, userId int64) ([]mod
 
 		if err := rows.Scan(
 			&item.ID,
-			&item.UserId,
+			&item.UserID,
 			&item.OrderNum,
 			&item.Amount,
 			&item.CreatedAt,

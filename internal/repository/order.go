@@ -20,7 +20,7 @@ func (r *Repository) GetOrderByUserId(ctx context.Context, num int, userId int64
 
 func (r *Repository) CreateOrder(ctx context.Context, userId int64, num int) (int64, error) {
 	order := models.Order{
-		UserId: userId,
+		UserID: userId,
 		Num:    num,
 		Status: models.OrderStatusNew,
 	}

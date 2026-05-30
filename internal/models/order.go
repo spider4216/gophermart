@@ -13,7 +13,7 @@ type OrderStatus string
 
 type Order struct {
 	ID        int64
-	UserId    int64
+	UserID    int64
 	Num       int
 	Status    OrderStatus
 	Accrual   float64
