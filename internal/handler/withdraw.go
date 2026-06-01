@@ -55,11 +55,11 @@ func (h Handler) Withdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var ErrNoBalance service.NoBalance
+	var ErrNoBalance *service.NoBalance
 
 	err = h.service.Withdraw(ctx, userId, orderNum, req.Sum)
 
-	if errors.Is(err, &ErrNoBalance) {
+	if errors.As(err, &ErrNoBalance) {
 		h.logger.Error("No balance", zap.Error(err))
 		w.WriteHeader(http.StatusPaymentRequired)
 		return
