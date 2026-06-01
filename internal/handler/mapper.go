@@ -7,30 +7,32 @@ import (
 )
 
 func (h Handler) mapOrdersResp(orders []models.Order) []models.OrderResp {
-	var resp []models.OrderResp
-
-	for _, order := range orders {
-		resp = append(resp, models.OrderResp{
+	return mapResp(orders, func(order models.Order) models.OrderResp {
+		return models.OrderResp{
 			Number:     strconv.Itoa(order.Num),
 			Status:     string(order.Status),
 			Accrual:    order.Accrual,
 			UploadedAt: order.UpdatedAt,
-		})
-	}
-
-	return resp
+		}
+	})
 }
 
 func (h Handler) mapWithdrawalsResp(withdrawals []models.Withdrawal) []models.WithdrawalsResp {
-	var resp []models.WithdrawalsResp
-
-	for _, withdrawal := range withdrawals {
-		resp = append(resp, models.WithdrawalsResp{
+	return mapResp(withdrawals, func(withdrawal models.Withdrawal) models.WithdrawalsResp {
+		return models.WithdrawalsResp{
 			Order:       strconv.Itoa(withdrawal.OrderNum),
 			Sum:         withdrawal.Amount,
 			ProcessedAt: withdrawal.CreatedAt,
-		})
+		}
+	})
+}
+
+func mapResp[T any, R any](items []T, fn func(T) R) []R {
+	var res []R
+
+	for _, item := range items {
+		res = append(res, fn(item))
 	}
 
-	return resp
+	return res
 }
